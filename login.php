@@ -65,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 <div class="login-box">
-  <div class="logo">ConcertsDB <span>v3.0</span></div>
+  <div class="logo">ConcertsDB <span>v3.2</span></div>
   <?php if (!empty($error)): ?>
     <div class="error"><?= htmlspecialchars($error) ?></div>
   <?php endif; ?>

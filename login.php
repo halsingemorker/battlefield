@@ -17,8 +17,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ConcertsDB — Login</title>
+<title>ConcertsDB by MorciMetálciGrupci — Login</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
@@ -34,12 +36,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   }
   .login-box {
     background: var(--surface); border: 1px solid var(--border);
-    padding: 48px; border-radius: 2px; width: 360px;
+    padding: 48px; border-radius: 2px; width: 480px; text-align: center;
   }
   .logo {
     font-family: 'Bebas Neue', sans-serif; font-size: 36px;
     letter-spacing: 3px; color: var(--accent); margin-bottom: 32px;
     text-align: center;
+    position: relative;
   }
   .logo span { color: var(--muted); font-size: 16px; letter-spacing: 1px;
     font-family: 'IBM Plex Mono', monospace; margin-left: 8px; }
@@ -65,7 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </head>
 <body>
 <div class="login-box">
-  <div class="logo">ConcertsDB <span>v3.2</span></div>
+  <div class="logo">MorciMetálciGrupci's<br>ConcertsDB</div>
+  <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--muted);text-align:center;margin:-16px 0 24px">v3.2</div>
   <?php if (!empty($error)): ?>
     <div class="error"><?= htmlspecialchars($error) ?></div>
   <?php endif; ?>

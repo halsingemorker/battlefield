@@ -1,22 +1,14 @@
 <?php
 // ══════════════════════════════════════════════════════════════
-// api.php  — ConcertsDB backend  (v3.1 additions marked below)
-// ══════════════════════════════════════════════════════════════
-//
-// MERGE INSTRUCTIONS:
-//   This file shows the COMPLETE api.php.
-//   Replace your existing api.php with this file entirely.
-//   Your config.php and auth.php are unchanged.
-//
+// api.php  — ConcertsDB backend  (v3.4)
 // ══════════════════════════════════════════════════════════════
 
-require_once __DIR__ . '/auth.php';   // session check — returns 401 JSON if not logged in
+require_once __DIR__ . '/auth.php';
 
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 
 // ── DB CONNECTION ─────────────────────────────────────────────
-// Uses constants defined in config.php (DB_HOST, DB_NAME, DB_USER, DB_PASS, DB_CHARSET)
 try {
     $dsn = 'mysql:host=' . DB_HOST . ';dbname=' . DB_NAME . ';charset=' . DB_CHARSET;
     $pdo = new PDO($dsn, DB_USER, DB_PASS, [
@@ -45,7 +37,6 @@ try {
     switch ($action) {
 
         // ── READ ──────────────────────────────────────────────
-        // Accepts both 'load_all' (original) and 'all' (v3.1)
         case 'load_all':
         case 'all':
             echo json_encode([
@@ -57,9 +48,7 @@ try {
             ]);
             break;
 
-        // ── v3.1: REVIEW SWEEP ────────────────────────────────
-        // Finds all events with status='upcoming' whose date < today,
-        // and updates them to status='review'.
+        // ── REVIEW SWEEP ──────────────────────────────────────
         case 'review_sweep':
             $today = date('Y-m-d');
             $stmt  = $pdo->prepare(
@@ -72,16 +61,12 @@ try {
             echo json_encode(['updated' => $stmt->rowCount()]);
             break;
 
-        // ── v3.1: ADD EVENT ───────────────────────────────────
+        // ── ADD EVENT ─────────────────────────────────────────
         case 'add_event':
             $pdo->beginTransaction();
             try {
-                // 1. Insert event
                 $event_id = insertEvent($pdo, $data);
-
-                // 2. Process bands + attendance
                 processBands($pdo, $event_id, $data);
-
                 $pdo->commit();
                 echo json_encode(['ok' => true, 'event_id' => $event_id]);
             } catch (Exception $e) {
@@ -90,24 +75,17 @@ try {
             }
             break;
 
-        // ── v3.1: EDIT EVENT ──────────────────────────────────
+        // ── EDIT EVENT ────────────────────────────────────────
         case 'edit_event':
             $event_id = intval($data['event_id'] ?? 0);
             if (!$event_id) throw new Exception('event_id is required');
 
             $pdo->beginTransaction();
             try {
-                // 1. Update event row
                 updateEvent($pdo, $event_id, $data);
-
-                // 2. Delete existing event_bands + attendance for this event,
-                //    then re-insert from form data.
                 $pdo->prepare("DELETE FROM attendance WHERE event_id = ?")->execute([$event_id]);
                 $pdo->prepare("DELETE FROM event_bands WHERE event_id = ?")->execute([$event_id]);
-
-                // 3. Re-insert bands + attendance
                 processBands($pdo, $event_id, $data);
-
                 $pdo->commit();
                 echo json_encode(['ok' => true]);
             } catch (Exception $e) {
@@ -116,7 +94,7 @@ try {
             }
             break;
 
-        // ── v3.1: ADD PERSON ──────────────────────────────────
+        // ── ADD PERSON ────────────────────────────────────────
         case 'add_person':
             $name = trim($data['person_name'] ?? '');
             $code = trim($data['person_code'] ?? '');
@@ -145,21 +123,23 @@ try {
 
 /**
  * Insert a new row into events. Returns the new event_id.
+ * v3.4: added country field.
  */
 function insertEvent(PDO $pdo, array $d): int {
     $stmt = $pdo->prepare("
         INSERT INTO events
-            (date, city, venue, festival, tour, status,
+            (date, city, country, venue, festival, tour, status,
              ticket_price_original, ticket_currency, price_note,
              setlistfm_url, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
     ");
     $stmt->execute([
-        sanitiseDate($d['date'] ?? ''),
-        trim($d['city']     ?? ''),
-        trim($d['venue']    ?? ''),
-        trim($d['festival'] ?? ''),
-        trim($d['tour']     ?? ''),
+        sanitiseDate($d['date']    ?? ''),
+        trim($d['city']            ?? ''),
+        trim($d['country']         ?? ''),
+        trim($d['venue']           ?? ''),
+        trim($d['festival']        ?? ''),
+        trim($d['tour']            ?? ''),
         sanitiseStatus($d['status'] ?? 'upcoming'),
         trim($d['ticket_price_original'] ?? ''),
         trim($d['ticket_currency']       ?? ''),
@@ -171,12 +151,14 @@ function insertEvent(PDO $pdo, array $d): int {
 
 /**
  * Update an existing event row.
+ * v3.4: added country field.
  */
 function updateEvent(PDO $pdo, int $event_id, array $d): void {
     $stmt = $pdo->prepare("
         UPDATE events SET
             date                  = ?,
             city                  = ?,
+            country               = ?,
             venue                 = ?,
             festival              = ?,
             tour                  = ?,
@@ -188,11 +170,12 @@ function updateEvent(PDO $pdo, int $event_id, array $d): void {
         WHERE event_id = ?
     ");
     $stmt->execute([
-        sanitiseDate($d['date'] ?? ''),
-        trim($d['city']     ?? ''),
-        trim($d['venue']    ?? ''),
-        trim($d['festival'] ?? ''),
-        trim($d['tour']     ?? ''),
+        sanitiseDate($d['date']    ?? ''),
+        trim($d['city']            ?? ''),
+        trim($d['country']         ?? ''),
+        trim($d['venue']           ?? ''),
+        trim($d['festival']        ?? ''),
+        trim($d['tour']            ?? ''),
         sanitiseStatus($d['status'] ?? 'past'),
         trim($d['ticket_price_original'] ?? ''),
         trim($d['ticket_currency']       ?? ''),
@@ -203,30 +186,29 @@ function updateEvent(PDO $pdo, int $event_id, array $d): void {
 }
 
 /**
- * Process band rows from form data:
- * - Creates new bands if needed
- * - Inserts event_bands rows
- * - Inserts attendance rows for all people × all bands
+ * Process band rows from form data.
+ * v3.4: added hated_it field (always 'False' for new entries —
+ *       hated_it is set manually or via edit, never on first insert).
  *
  * Attendance logic:
  *   was_at_event = True  if person_code is in event_attendees[]
  *   did_see      = True  if person_code is in band.attendees[]
- *                        (did_see can only be True if was_at_event is also True)
+ *   hated_it     = False always on insert (corrected manually later)
+ *   did_see is forced False if was_at_event is False
  */
 function processBands(PDO $pdo, int $event_id, array $d): void {
     $bands           = $d['bands']           ?? [];
-    $event_attendees = $d['event_attendees'] ?? [];  // array of person_codes
+    $event_attendees = $d['event_attendees'] ?? [];
 
-    // Fetch all people for attendance rows
     $people = $pdo->query("SELECT person_code, person_name FROM people")->fetchAll();
 
     foreach ($bands as $band) {
-        $band_name  = trim($band['band_name'] ?? '');
+        $band_name   = trim($band['band_name'] ?? '');
         if ($band_name === '') continue;
 
-        $band_id    = $band['band_id']    ? intval($band['band_id']) : null;
-        $band_status= in_array($band['status'], ['performed','cancelled']) ? $band['status'] : 'performed';
-        $did_see_codes = $band['attendees'] ?? [];  // person_codes who saw this band
+        $band_id     = $band['band_id'] ? intval($band['band_id']) : null;
+        $band_status = in_array($band['status'], ['performed','cancelled']) ? $band['status'] : 'performed';
+        $did_see_codes = $band['attendees'] ?? [];
 
         // Create new band if needed
         if (!$band_id) {
@@ -236,9 +218,7 @@ function processBands(PDO $pdo, int $event_id, array $d): void {
             if ($row) {
                 $band_id = (int) $row['band_id'];
             } else {
-                $ins = $pdo->prepare(
-                    "INSERT INTO bands (band_name) VALUES (?)"
-                );
+                $ins = $pdo->prepare("INSERT INTO bands (band_name) VALUES (?)");
                 $ins->execute([$band_name]);
                 $band_id = (int) $pdo->lastInsertId();
             }
@@ -255,8 +235,8 @@ function processBands(PDO $pdo, int $event_id, array $d): void {
         $att_stmt = $pdo->prepare("
             INSERT INTO attendance
                 (event_id, event_band_id, band_id, person_code, person_name,
-                 was_at_event, did_see, rating, rating_notes)
-            VALUES (?, ?, ?, ?, ?, ?, ?, NULL, NULL)
+                 was_at_event, did_see, hated_it, rating, rating_notes)
+            VALUES (?, ?, ?, ?, ?, ?, ?, 'False', NULL, NULL)
         ");
 
         foreach ($people as $person) {
@@ -264,7 +244,6 @@ function processBands(PDO $pdo, int $event_id, array $d): void {
             $name         = $person['person_name'];
             $was_at_event = in_array($code, $event_attendees) ? 'True' : 'False';
             $did_see      = in_array($code, $did_see_codes)   ? 'True' : 'False';
-            // Sanity: can't have seen a band if not at event
             if ($was_at_event === 'False') $did_see = 'False';
 
             $att_stmt->execute([
@@ -278,26 +257,16 @@ function processBands(PDO $pdo, int $event_id, array $d): void {
             ]);
         }
     }
-
-    // If event has attendees but no bands, we still need attendance rows
-    // so the "Who" column works in the Concerts view.
-    // Only insert if no bands were processed.
-    if (empty($bands) && !empty($event_attendees)) {
-        // No band-level rows; handled at event level only via a sentinel approach.
-        // Currently the data model requires at least one band row for attendance.
-        // Leave empty — user can add bands later via edit.
-    }
 }
 
 /**
  * Validate and sanitise date string.
- * Allows yyyy-mm-dd or known exceptions like '2023.?'
  */
 function sanitiseDate(string $d): string {
     $d = trim($d);
     if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $d)) return $d;
-    if (preg_match('/^\d{4}\.\?$/', $d)) return $d;  // legacy '2023.?' format
-    return $d; // store as-is, validation is done on the frontend
+    if (preg_match('/^\d{4}\.\?$/', $d)) return $d;
+    return $d;
 }
 
 /**

@@ -2,8 +2,10 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ConcertsDB</title>
+<title>ConcertsDB by MorciMetálciGrupci</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
@@ -285,7 +287,7 @@
 </div>
 
 <header>
-  <div class="logo">ConcertsDB <span>v3.2</span></div>
+  <div class="logo">ConcertsDB <span>v3.3</span><br><span style="font-size:11px;letter-spacing:1px;margin-top:-4px;display:block">by MorciMetálciGrupci</span></div>
   <nav>
     <button class="active" onclick="showView('concerts')">Concerts</button>
     <button onclick="showView('bands')">Bands</button>
@@ -326,6 +328,7 @@
       <table id="concerts-table">
         <thead>
           <tr>
+            <th style="cursor:default;color:var(--muted)">#</th>
             <th onclick="sortBy('date')" id="th-date" class="sorted">Date ↓</th>
             <th>City</th>
             <th>Venue</th>
@@ -345,18 +348,6 @@
   <div id="view-bands" class="view">
     <div class="bands-filters">
       <input type="text" id="band-filter-input" placeholder="Filter by band name…" oninput="applyBandFilters()">
-      <div class="person-checkboxes">
-        <!-- FIX 1: Árpi inner checkbox id was 'chk-label-Á-inner', now correctly 'chk-Á' -->
-        <label class="person-checkbox-label" id="chk-label-L" onclick="togglePersonCheck('L')">
-          <input type="checkbox" id="chk-L"> L
-        </label>
-        <label class="person-checkbox-label" id="chk-label-S" onclick="togglePersonCheck('S')">
-          <input type="checkbox" id="chk-S"> S
-        </label>
-        <label class="person-checkbox-label" id="chk-label-Á" onclick="togglePersonCheck('Á')">
-          <input type="checkbox" id="chk-Á"> Á
-        </label>
-      </div>
       <button class="clear-btn" onclick="clearBandFilters()">✕ Clear</button>
     </div>
     <div class="result-count" id="band-result-count"></div>
@@ -439,7 +430,6 @@ let sortCol = 'date', sortDir = -1;
 let bandsData = [];
 let filteredBands = [];
 let bandSortCol = 'times_seen', bandSortDir = -1;
-let personChecks = { L: false, S: false, 'Á': false };
 
 let currentStatsPerson = 'L';
 
@@ -613,6 +603,7 @@ function renderTable() {
     const reviewFlag = isReview ? `<span style="color:var(--accent2);font-weight:700;margin-right:5px;font-family:'IBM Plex Mono',monospace">!</span>` : '';
     const rowClass = ev.status==='cancelled' ? 'cancelled' : isReview ? 'review-row' : '';
     return `<tr class="${rowClass}">
+      <td class="mono" style="color:var(--muted);font-size:11px">${ev.event_id}</td>
       <td class="date-col">${reviewFlag}${ev.date||'?'}</td>
       <td>${ev.city||''}</td>
       <td>${ev.venue||''}</td>
@@ -646,23 +637,10 @@ function computeBandsData() {
   bandsData = Object.values(bandMap).map(b => ({ ...b, times_seen: b._seen_events.size }));
 }
 
-// FIX 1: togglePersonCheck now correctly targets 'chk-label-Á' (the label element)
-function togglePersonCheck(code) {
-  personChecks[code] = !personChecks[code];
-  const label = document.getElementById('chk-label-' + code);
-  if (label) {
-    if (personChecks[code]) label.classList.add('checked-' + code);
-    else label.classList.remove('checked-' + code);
-  }
-  applyBandFilters();
-}
-
 function applyBandFilters() {
   const q = document.getElementById('band-filter-input').value.toLowerCase().trim();
-  const activePersons = Object.entries(personChecks).filter(([,v])=>v).map(([k])=>k);
   filteredBands = bandsData.filter(b => {
     if (q && !b.band_name.toLowerCase().includes(q)) return false;
-    if (activePersons.length > 0 && !activePersons.every(p => b[p] > 0)) return false;
     return true;
   });
   sortBandsData();
@@ -908,7 +886,7 @@ function buildFormHTML(ev) {
     <div class="form-msg" id="form-msg"></div>
 
     <div class="form-actions">
-      ${isEdit ? `<button class="btn-mark-past" onclick="markAs('past')">✓ Mark as Past</button>` : ''}
+      ${isEdit && ev.status === 'review' ? `<button class="btn-mark-past" onclick="markAs('past')">✓ Mark as Revised</button>` : ''}
       <button class="btn-save" id="btn-save" onclick="saveEvent()">${isEdit ? 'Save changes' : 'Add concert'}</button>
       ${isEdit ? `<button class="btn-mark-cancelled" onclick="markAs('cancelled')">✕ Mark as Cancelled</button>
       <button class="btn-cancel-form" onclick="closeFormModal()">Cancel</button>` : ''}

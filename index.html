@@ -104,10 +104,39 @@
   .badge-Á     { background: rgba(255,183,77,0.15); color: var(--arpi); border: 1px solid rgba(255,183,77,0.3); }
   .badge-other { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
 
-  .band-tags { display: flex; gap: 4px; flex-wrap: wrap; }
-  .band-tag { font-size: 12px; padding: 2px 8px; border-radius: 2px; border: 1px solid var(--border); color: var(--text); cursor: pointer; transition: all 0.1s; }
+  .band-tags { display: flex; gap: 6px; flex-wrap: wrap; align-items: flex-start; }
+  .band-entry { display: inline-flex; align-items: center; gap: 2px; }
+  .band-tag { font-size: 12px; padding: 2px 8px; border-radius: 2px; border: 1px solid var(--border); color: var(--text); cursor: pointer; transition: all 0.1s; white-space: nowrap; }
   .band-tag:hover { border-color: var(--accent); color: var(--accent); }
   .band-tag.cancelled-band { opacity: 0.35; color: var(--accent2); border-color: rgba(255,71,71,0.3); }
+
+  /* Per-band person indicator badges */
+  .bpi {
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'IBM Plex Mono', monospace; font-size: 8px; font-weight: 700;
+    width: 13px; height: 13px; border-radius: 2px; position: relative; flex-shrink: 0; line-height: 1;
+  }
+  .bpi-seen-L { color: var(--luki);  background: rgba(79,195,247,0.18);  border: 1px solid rgba(79,195,247,0.5); }
+  .bpi-seen-S { color: var(--sanyi); background: rgba(129,199,132,0.18); border: 1px solid rgba(129,199,132,0.5); }
+  .bpi-seen-Á { color: var(--arpi);  background: rgba(255,183,77,0.18);  border: 1px solid rgba(255,183,77,0.5); }
+  .bpi-skip-L { color: rgba(79,195,247,0.5);  background: transparent; border: 1px solid rgba(79,195,247,0.2); }
+  .bpi-skip-S { color: rgba(129,199,132,0.5); background: transparent; border: 1px solid rgba(129,199,132,0.2); }
+  .bpi-skip-Á { color: rgba(255,183,77,0.5);  background: transparent; border: 1px solid rgba(255,183,77,0.2); }
+  .bpi-hate-L, .bpi-hate-S, .bpi-hate-Á { color: rgba(200,80,80,0.7); background: rgba(255,71,71,0.08); border: 1px solid rgba(255,71,71,0.3); }
+  .bpi-skip-L::after, .bpi-skip-S::after, .bpi-skip-Á::after {
+    content: ''; position: absolute; inset: 1px;
+    background: linear-gradient(to bottom right, transparent calc(50% - 0.5px), currentColor calc(50% - 0.5px), currentColor calc(50% + 0.5px), transparent calc(50% + 0.5px));
+    opacity: 0.7;
+  }
+  .bpi-hate-L::after, .bpi-hate-S::after, .bpi-hate-Á::after {
+    content: '✕'; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 7px; color: var(--accent2); font-family: sans-serif;
+  }
+
+  /* Venue/city/country cell */
+  .venue-line { font-size: 13px; }
+  .loc-line { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 2px; }
 
   .status-pill { font-family: 'IBM Plex Mono', monospace; font-size: 10px; padding: 2px 7px; border-radius: 2px; text-transform: uppercase; letter-spacing: 0.5px; }
   .status-past      { background: rgba(255,255,255,0.05); color: var(--muted); }
@@ -259,8 +288,90 @@
   .form-msg.success { background: rgba(129,199,132,0.12); color: var(--sanyi); border: 1px solid rgba(129,199,132,0.25); display: block; }
   .form-msg.error   { background: rgba(255,71,71,0.1);   color: var(--accent2); border: 1px solid rgba(255,71,71,0.25); display: block; }
 
-  #view-add { max-width: 820px; }
+  #view-add { max-width: 900px; }
   .add-view-intro { font-family: 'IBM Plex Mono', monospace; font-size: 12px; color: var(--muted); margin-bottom: 24px; }
+
+  /* ── 4-WAY STATUS SWITCH ── */
+  .status-switch { display: flex; gap: 0; border-radius: 2px; overflow: hidden; border: 1px solid var(--border); }
+  .status-switch-btn {
+    flex: 1; background: none; border: none; border-right: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.5px; padding: 8px 4px; cursor: pointer; color: var(--muted);
+    transition: all 0.15s; text-align: center;
+  }
+  .status-switch-btn:last-child { border-right: none; }
+  .status-switch-btn.active-past      { background: rgba(255,255,255,0.06); color: var(--text); }
+  .status-switch-btn.active-upcoming  { background: rgba(167,139,250,0.15); color: var(--upcoming); }
+  .status-switch-btn.active-review    { background: rgba(255,71,71,0.12); color: var(--accent2); }
+  .status-switch-btn.active-cancelled { background: rgba(255,71,71,0.1); color: var(--accent2); }
+
+  /* ── FESTIVAL/TOUR TOGGLE ── */
+  .fest-tour-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .fest-tour-label-row { display: flex; gap: 0; }
+  .fest-tour-tab {
+    font-family: 'IBM Plex Mono', monospace; font-size: 10px; text-transform: uppercase;
+    letter-spacing: 0.5px; padding: 3px 10px; cursor: pointer; color: var(--muted);
+    border: 1px solid var(--border); background: none; transition: all 0.15s;
+    border-radius: 2px 0 0 0;
+  }
+  .fest-tour-tab:last-of-type { border-radius: 0 2px 0 0; border-left: none; }
+  .fest-tour-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: rgba(255,135,83,0.06); }
+  .fest-tour-input { border-radius: 0 2px 2px 2px !important; }
+
+  /* ── URL INPUT WITH ICON ── */
+  .url-field-wrap { display: flex; gap: 6px; align-items: center; }
+  .url-field-wrap input { flex: 1; }
+  .url-icon-btn {
+    background: none; border: 1px solid var(--border); color: var(--muted);
+    padding: 8px 10px; border-radius: 2px; cursor: pointer; font-size: 14px;
+    transition: all 0.15s; line-height: 1; flex-shrink: 0; text-decoration: none;
+    display: inline-flex; align-items: center;
+  }
+  .url-icon-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ── COMPACT FORM GRID ── */
+  .form-row { display: flex; gap: 10px; margin-bottom: 10px; align-items: flex-end; }
+  .form-row .ff { display: flex; flex-direction: column; gap: 5px; }
+  .form-row .ff label { font-family: 'IBM Plex Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .ff-date   { width: 120px; flex-shrink: 0; }
+  .ff-country{ width: 56px; flex-shrink: 0; }
+  .ff-city   { width: 140px; flex-shrink: 0; }
+  .ff-venue  { flex: 1; min-width: 120px; }
+  .ff-festtour { flex: 1; }
+  .ff-price  { width: 90px; flex-shrink: 0; }
+  .ff-curr   { width: 80px; flex-shrink: 0; }
+  .ff-pnote  { flex: 1; }
+  .ff-status { flex-shrink: 0; }
+  .ff-notes  { width: 100%; }
+  .ff-url    { flex: 1; }
+
+  /* ── THREE-STATE BAND PERSON TOGGLE ── */
+  .band-person-toggle {
+    font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1px;
+    padding: 3px 8px; border-radius: 2px; cursor: pointer;
+    border: 1px solid var(--border); background: none; color: var(--muted);
+    transition: all 0.15s; position: relative; min-width: 28px; text-align: center;
+    user-select: none;
+  }
+  /* State: seen */
+  .band-person-toggle[data-code="L"].st-seen { color: var(--luki);  border-color: var(--luki);  background: rgba(79,195,247,0.12); }
+  .band-person-toggle[data-code="S"].st-seen { color: var(--sanyi); border-color: var(--sanyi); background: rgba(129,199,132,0.12); }
+  .band-person-toggle[data-code="Á"].st-seen { color: var(--arpi);  border-color: var(--arpi);  background: rgba(255,183,77,0.12); }
+  /* State: skip - dim with slash */
+  .band-person-toggle.st-skip { color: var(--muted); border-color: var(--border); background: none; opacity: 0.6; }
+  .band-person-toggle.st-skip::after {
+    content: ''; position: absolute; inset: 2px;
+    background: linear-gradient(to bottom right, transparent calc(50% - 0.6px), var(--muted) calc(50% - 0.6px), var(--muted) calc(50% + 0.6px), transparent calc(50% + 0.6px));
+  }
+  /* State: hate - red X */
+  .band-person-toggle.st-hate { color: rgba(200,80,80,0.5); border-color: rgba(255,71,71,0.4); background: rgba(255,71,71,0.06); opacity: 1; }
+  .band-person-toggle.st-hate::after {
+    content: '✕'; position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; color: var(--accent2); font-family: sans-serif; font-weight: bold;
+  }
+  /* active-other for non-main people */
+  .band-person-toggle.active-other { color: var(--text); border-color: var(--text); background: rgba(255,255,255,0.06); }
 
   #person-picker { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 300; align-items: center; justify-content: center; }
   #person-picker.open { display: flex; }
@@ -287,7 +398,7 @@
 </div>
 
 <header>
-  <div class="logo">ConcertsDB <span>v3.3</span><br><span style="font-size:11px;letter-spacing:1px;margin-top:-4px;display:block">by MorciMetálciGrupci</span></div>
+  <div class="logo">ConcertsDB <span>v4.0</span><br><span style="font-size:11px;letter-spacing:1px;margin-top:-4px;display:block">by MorciMetálciGrupci</span></div>
   <nav>
     <button class="active" onclick="showView('concerts')">Concerts</button>
     <button onclick="showView('bands')">Bands</button>
@@ -313,6 +424,12 @@
         <option value="S">Sanyi</option>
         <option value="Á">Árpi</option>
       </select>
+      <select id="f-seen" onchange="applyFilters()">
+        <option value="">All bands</option>
+        <option value="seen">Seen</option>
+        <option value="skip">Skipped</option>
+        <option value="hate">Hated</option>
+      </select>
       <select id="f-status" onchange="applyFilters()">
         <option value="">All statuses</option>
         <option value="past">Past</option>
@@ -330,12 +447,11 @@
           <tr>
             <th style="cursor:default;color:var(--muted)">#</th>
             <th onclick="sortBy('date')" id="th-date" class="sorted">Date ↓</th>
-            <th>City</th>
-            <th>Venue</th>
-            <th>Festival / Tour</th>
-            <th>Bands</th>
-            <th>Who</th>
-            <th>Status</th>
+            <th style="cursor:default">Venue / City</th>
+            <th style="cursor:default">Festival / Tour</th>
+            <th style="cursor:default">Bands</th>
+            <th style="cursor:default">Who</th>
+            <th style="cursor:default">Status</th>
             <th style="width:36px;cursor:default"></th>
           </tr>
         </thead>
@@ -443,7 +559,7 @@ async function loadAll() {
     const data = await r.json();
     if (data.error) throw new Error(data.error);
 
-    data.attendance = data.attendance.map(a => ({ ...a, was_at_event: a.was_at_event === 'True', did_see: a.did_see === 'True' }));
+    data.attendance = data.attendance.map(a => ({ ...a, was_at_event: a.was_at_event === 'True', did_see: a.did_see === 'True', hated_it: a.hated_it === 'True' }));
     data.events      = data.events.map(e => ({ ...e, event_id: String(e.event_id) }));
     data.bands       = data.bands.map(b => ({ ...b, band_id: String(b.band_id) }));
     data.event_bands = data.event_bands.map(eb => ({ ...eb, event_id: String(eb.event_id), band_id: String(eb.band_id), event_band_id: String(eb.event_band_id) }));
@@ -507,6 +623,7 @@ function applyFilters() {
   const year   = document.getElementById('f-year').value;
   const city   = document.getElementById('f-city').value;
   const person = document.getElementById('f-person').value;
+  const seen   = document.getElementById('f-seen').value;
   const status = document.getElementById('f-status').value;
 
   const eventBandsMap = {};
@@ -527,6 +644,17 @@ function applyFilters() {
     if (city   && ev.city !== city)           return false;
     if (status && ev.status !== status)       return false;
     if (person && !(eventAttendeesMap[ev.event_id] || new Set()).has(person)) return false;
+    if (seen && person) {
+      // Filter events where the selected person has at least one band matching the seen state
+      const matches = DB.attendance.filter(a => a.event_id === ev.event_id && a.person_code === person);
+      let found = false;
+      for (const a of matches) {
+        if (seen === 'seen' && a.did_see)                          { found = true; break; }
+        if (seen === 'skip' && a.was_at_event && !a.did_see && !a.hated_it) { found = true; break; }
+        if (seen === 'hate' && a.hated_it)                         { found = true; break; }
+      }
+      if (!found) return false;
+    }
     if (search) {
       const bands = (eventBandsMap[ev.event_id] || []).join(' ');
       const haystack = [ev.date, ev.city, ev.venue, ev.festival, ev.tour, bands].join(' ').toLowerCase();
@@ -541,7 +669,7 @@ function applyFilters() {
 }
 
 function clearFilters() {
-  ['f-search','f-year','f-city','f-person','f-status'].forEach(id => {
+  ['f-search','f-year','f-city','f-person','f-seen','f-status'].forEach(id => {
     const el = document.getElementById(id);
     if (el.tagName === 'INPUT') el.value = ''; else el.selectedIndex = 0;
   });
@@ -587,12 +715,43 @@ function renderTable() {
     tbody.innerHTML = `<tr><td colspan="8" class="empty-state">No concerts match your filters.</td></tr>`;
     return;
   }
+
+  // Build per-band attendance lookup: eventId+bandId -> {personCode -> {did_see, hated_it, was_at_event}}
+  const attMap = {};
+  DB.attendance.forEach(a => {
+    const key = `${a.event_id}|${a.band_id}`;
+    if (!attMap[key]) attMap[key] = {};
+    attMap[key][a.person_code] = { did_see: a.did_see, hated_it: a.hated_it, was_at: a.was_at_event };
+  });
+
   tbody.innerHTML = filteredEvents.map(ev => {
     const bands     = getBandsForEvent(ev.event_id);
     const attendees = getAttendeesForEvent(ev.event_id);
     const festTour  = ev.festival || ev.tour || '';
     const isReview  = ev.status === 'review';
-    const bandTags  = bands.map(b => `<span class="band-tag ${b.status==='cancelled'?'cancelled-band':''}" onclick="goBand(${JSON.stringify(b.name)})">${b.name}</span>`).join('');
+
+    // Venue/city/country cell
+    const locParts = [ev.city, ev.country].filter(Boolean).join(' · ');
+    const venueCell = `<div class="venue-line">${ev.venue||''}</div>${locParts ? `<div class="loc-line">${locParts}</div>` : ''}`;
+
+    // Band tags with per-band person indicators
+    const bandTags = bands.map(b => {
+      const key = `${ev.event_id}|${b.band_id}`;
+      const bAtt = attMap[key] || {};
+      const indicators = MAIN
+        .filter(code => attendees.has(code)) // only show for people who were at the event
+        .map(code => {
+          const pa = bAtt[code];
+          if (!pa || !pa.was_at) return '';
+          let cls;
+          if (pa.did_see)        cls = `bpi-seen-${code}`;
+          else if (pa.hated_it)  cls = `bpi-hate-${code}`;
+          else                   cls = `bpi-skip-${code}`;
+          return `<span class="bpi ${cls}">${code}</span>`;
+        }).join('');
+      return `<span class="band-entry"><span class="band-tag ${b.status==='cancelled'?'cancelled-band':''}" onclick="goBand(${JSON.stringify(b.name)})">${b.name}</span>${indicators}</span>`;
+    }).join('');
+
     const badges = [...attendees]
       .sort((a,b) => { const ai=MAIN.indexOf(a),bi=MAIN.indexOf(b); return (ai===-1?99:ai)-(bi===-1?99:bi); })
       .map(code => {
@@ -605,8 +764,7 @@ function renderTable() {
     return `<tr class="${rowClass}">
       <td class="mono" style="color:var(--muted);font-size:11px">${ev.event_id}</td>
       <td class="date-col">${reviewFlag}${ev.date||'?'}</td>
-      <td>${ev.city||''}</td>
-      <td>${ev.venue||''}</td>
+      <td>${venueCell}</td>
       <td style="color:var(--muted);font-size:12px">${festTour}</td>
       <td><div class="band-tags">${bandTags||'—'}</div></td>
       <td><div class="person-badges">${badges||'—'}</div></td>
@@ -798,11 +956,18 @@ function openEditForm(event_id) {
   const ebRows = DB.event_bands.filter(eb => eb.event_id === event_id);
   formBandRows = ebRows.map(eb => {
     const band = DB.bands.find(b => b.band_id === eb.band_id);
-    const saw = new Set();
-    DB.attendance.forEach(a => { if (a.event_id === event_id && a.band_id === eb.band_id && a.did_see) saw.add(a.person_code); });
-    return { band_id: eb.band_id, band_name: band?.band_name||'', status: eb.status, attendees: saw };
+    const saw  = new Set();
+    const personStates = {};
+    DB.attendance.forEach(a => {
+      if (a.event_id === event_id && a.band_id === eb.band_id) {
+        if (a.did_see)       { saw.add(a.person_code); personStates[a.person_code] = 'seen'; }
+        else if (a.hated_it) { personStates[a.person_code] = 'hate'; }
+        else if (a.was_at_event) { personStates[a.person_code] = 'skip'; }
+      }
+    });
+    return { band_id: eb.band_id, band_name: band?.band_name||'', status: eb.status, attendees: saw, personStates };
   });
-  if (formBandRows.length === 0) formBandRows = [{ band_id: null, band_name: '', status: 'performed', attendees: new Set() }];
+  if (formBandRows.length === 0) formBandRows = [{ band_id: null, band_name: '', status: 'performed', attendees: new Set(), personStates: {} }];
   document.getElementById('form-title').textContent = 'Edit Concert';
   document.getElementById('form-body').innerHTML = buildFormHTML(ev);
   document.getElementById('form-overlay').classList.add('open');
@@ -814,57 +979,130 @@ function closeFormModal() {
 
 // FIX 2: Status dropdown no longer shows 'upcoming' twice in Add mode
 function buildFormHTML(ev) {
-  const isEdit = !!ev;
-  const allStatuses = ['past','upcoming','review','cancelled'];
-  const statusOptions = allStatuses.map(s =>
-    `<option value="${s}"${ev?.status===s?' selected':(!isEdit && s==='upcoming'?' selected':'')}>${s}</option>`
-  ).join('');
+  const isEdit   = !!ev;
+  const curSt    = ev?.status || 'upcoming';
+  const statuses = [
+    {v:'past',      label:'Past'},
+    {v:'upcoming',  label:'Upcoming'},
+    {v:'review',    label:'Review'},
+    {v:'cancelled', label:'Cancelled'},
+  ];
+  const statusSwitch = `<div class="status-switch">${statuses.map(s =>
+    `<button type="button" class="status-switch-btn${curSt===s.v?' active-'+s.v:''}" data-status="${s.v}" onclick="setFormStatus(this)">${s.label}</button>`
+  ).join('')}</div><input type="hidden" id="f-status-form" value="${curSt}">`;
+
   const currOpts = `<option value="">—</option>` + CURRENCIES.map(c =>
     `<option value="${c}"${ev?.ticket_currency===c?' selected':''}>${c}</option>`
   ).join('');
 
+  // Festival/Tour toggle — determine current type
+  const hasFestival = !!(ev?.festival);
+  const hasTour     = !!(ev?.tour);
+  const ftType      = hasTour && !hasFestival ? 'tour' : 'festival';
+  const ftValue     = ftType === 'tour' ? (ev?.tour||'') : (ev?.festival||'');
+
+  // Event URL and ticket URL
+  const eventUrl  = ev?.event_url  || '';
+  const ticketUrl = ev?.ticket_url || '';
+  const country   = ev?.country    || '';
+
   return `
     <div class="form-section">
       <div class="form-section-label">Event details</div>
-      <div class="form-grid">
-        <div class="form-field">
+
+      <!-- Row A: Date · Country · City · Venue -->
+      <div class="form-row">
+        <div class="ff ff-date">
           <label>Date *</label>
-          <input type="text" id="f-date" placeholder="yyyy-mm-dd" value="${escHtml(ev?.date||'')}" maxlength="10">
+          <input type="text" id="f-date" placeholder="yyyy-mm-dd" value="${escHtml(ev?.date||'')}" maxlength="10"
+            style="background:#0d0d0d;border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:8px 10px;border-radius:2px;outline:none;width:100%"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
         </div>
-        <div class="form-field">
-          <label>Status</label>
-          <select id="f-status-form">${statusOptions}</select>
+        <div class="ff ff-country">
+          <label>Country</label>
+          <input type="text" id="f-country" placeholder="H" value="${escHtml(country)}" maxlength="5"
+            style="background:#0d0d0d;border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:8px 10px;border-radius:2px;outline:none;width:100%"
+            onfocus="this.style.borderColor='var(--accent)';suggestFromCountry(this.value)" onblur="this.style.borderColor='var(--border)'" oninput="suggestFromCountry(this.value)">
         </div>
-        <div class="form-field">
+        <div class="ff ff-city">
           <label>City</label>
-          <input type="text" id="f-city-form" value="${escHtml(ev?.city||'')}">
+          <input type="text" id="f-city-form" placeholder="Budapest" value="${escHtml(ev?.city||'')}"
+            style="background:#0d0d0d;border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:8px 10px;border-radius:2px;outline:none;width:100%"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'" oninput="suggestFromCity(this.value)">
         </div>
-        <div class="form-field">
+        <div class="ff ff-venue">
           <label>Venue</label>
-          <input type="text" id="f-venue" value="${escHtml(ev?.venue||'')}">
+          <input type="text" id="f-venue" placeholder="Barba Negra" value="${escHtml(ev?.venue||'')}"
+            style="background:#0d0d0d;border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:8px 10px;border-radius:2px;outline:none;width:100%"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'" oninput="suggestFromVenue(this.value)">
         </div>
-        <div class="form-field">
-          <label>Festival</label>
-          <input type="text" id="f-festival" value="${escHtml(ev?.festival||'')}">
-        </div>
-        <div class="form-field">
-          <label>Tour</label>
-          <input type="text" id="f-tour" value="${escHtml(ev?.tour||'')}">
-        </div>
-        <div class="form-field">
-          <label>Ticket price</label>
-          <div class="price-row">
-            <input type="text" id="f-price" placeholder="e.g. 12000" value="${escHtml(ev?.ticket_price_original||'')}">
-            <select id="f-currency">${currOpts}</select>
+      </div>
+
+      <!-- Row B: Festival/Tour · Price · Currency · Price note -->
+      <div class="form-row">
+        <div class="ff ff-festtour">
+          <div class="fest-tour-wrap">
+            <div class="fest-tour-label-row">
+              <button type="button" class="fest-tour-tab${ftType==='festival'?' active':''}" id="ft-tab-festival" onclick="setFestTourType('festival')">Festival</button>
+              <button type="button" class="fest-tour-tab${ftType==='tour'?' active':''}" id="ft-tab-tour" onclick="setFestTourType('tour')">Tour</button>
+            </div>
+            <input type="text" id="f-festtour" class="fest-tour-input" placeholder="${ftType==='festival'?'Festival name':'Tour name'}" value="${escHtml(ftValue)}"
+              style="background:#0d0d0d;border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:8px 10px;border-radius:0 2px 2px 2px;outline:none;width:100%"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            <input type="hidden" id="f-festtour-type" value="${ftType}">
           </div>
         </div>
-        <div class="form-field">
-          <label>Price note</label>
-          <input type="text" id="f-price-note" placeholder="e.g. included in festival pass" value="${escHtml(ev?.price_note||'')}">
+        <div class="ff ff-price">
+          <label>Price</label>
+          <input type="text" id="f-price" placeholder="12000" value="${escHtml(ev?.ticket_price_original||'')}" maxlength="10"
+            style="background:#0d0d0d;border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:8px 10px;border-radius:2px;outline:none;width:100%"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
         </div>
-        <div class="form-field span-2">
+        <div class="ff ff-curr">
+          <label>Currency</label>
+          <select id="f-currency" style="background:#0d0d0d;border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:8px 10px;border-radius:2px;outline:none;width:100%;cursor:pointer">${currOpts}</select>
+        </div>
+        <div class="ff ff-pnote">
+          <label>Price note</label>
+          <input type="text" id="f-price-note" placeholder="included in festival pass" value="${escHtml(ev?.price_note||'')}"
+            style="background:#0d0d0d;border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:13px;padding:8px 10px;border-radius:2px;outline:none;width:100%"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+      </div>
+
+      <!-- Row C: Notes (single row) -->
+      <div class="form-row">
+        <div class="ff" style="flex:1">
           <label>Notes</label>
-          <textarea id="f-notes">${escHtml(ev?.notes||'')}</textarea>
+          <input type="text" id="f-notes" placeholder="Notes…" value="${escHtml(ev?.notes||'')}"
+            style="background:#0d0d0d;border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Sans',monospace;font-size:13px;padding:8px 10px;border-radius:2px;outline:none;width:100%"
+            onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+      </div>
+
+      <!-- Row D: Status switch · Event URL · Ticket URL -->
+      <div class="form-row" style="align-items:flex-start">
+        <div class="ff ff-status">
+          <label>Status</label>
+          ${statusSwitch}
+        </div>
+        <div class="ff ff-url">
+          <label>Event link</label>
+          <div class="url-field-wrap">
+            <input type="text" id="f-event-url" placeholder="https://…" value="${escHtml(eventUrl)}"
+              style="background:#0d0d0d;border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:8px 10px;border-radius:2px;outline:none;width:100%"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            <a id="event-url-btn" href="${escHtml(eventUrl)||'#'}" target="_blank" class="url-icon-btn" title="Open event link">🌐</a>
+          </div>
+        </div>
+        <div class="ff ff-url">
+          <label>Ticket link</label>
+          <div class="url-field-wrap">
+            <input type="text" id="f-ticket-url" placeholder="https://…" value="${escHtml(ticketUrl)}"
+              style="background:#0d0d0d;border:1px solid var(--border);color:var(--text);font-family:'IBM Plex Mono',monospace;font-size:12px;padding:8px 10px;border-radius:2px;outline:none;width:100%"
+              onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+            <a id="ticket-url-btn" href="${escHtml(ticketUrl)||'#'}" target="_blank" class="url-icon-btn" title="Open ticket link">🎫</a>
+          </div>
         </div>
       </div>
     </div>
@@ -878,7 +1116,7 @@ function buildFormHTML(ev) {
     </div>
 
     <div class="form-section">
-      <div class="form-section-label">Bands</div>
+      <div class="form-section-label">Bands <span style="font-size:9px;color:var(--muted);font-weight:normal;letter-spacing:0">— ✕ hated &nbsp; / skipped</span></div>
       <div id="band-rows">${buildAllBandRows()}</div>
       <button class="add-band-btn" onclick="addBandRow()">+ Add band</button>
     </div>
@@ -893,7 +1131,118 @@ function buildFormHTML(ev) {
     </div>`;
 }
 
-function buildEventAttendeeToggles() {
+function setFormStatus(btn) {
+  const status = btn.dataset.status;
+  document.getElementById('f-status-form').value = status;
+  btn.closest('.status-switch').querySelectorAll('.status-switch-btn').forEach(b => {
+    b.className = 'status-switch-btn' + (b.dataset.status === status ? ' active-'+status : '');
+  });
+}
+
+let formFestTourType = 'festival';
+function setFestTourType(type) {
+  formFestTourType = type;
+  document.getElementById('f-festtour-type').value = type;
+  document.getElementById('f-festtour').placeholder = type === 'festival' ? 'Festival name' : 'Tour name';
+  document.getElementById('ft-tab-festival').classList.toggle('active', type === 'festival');
+  document.getElementById('ft-tab-tour').classList.toggle('active', type === 'tour');
+}
+
+// ── VENUE/CITY/COUNTRY SUGGESTION SYSTEM ─────────────────────
+function buildVenueMap() {
+  const map = {}; // venue -> {city, country}
+  DB.events.forEach(e => {
+    if (e.venue && e.venue !== 'CANCELLED') {
+      if (!map[e.venue]) map[e.venue] = { city: e.city||'', country: e.country||'' };
+    }
+  });
+  return map;
+}
+
+function suggestFromVenue(val) {
+  const v = val.trim();
+  if (!v) return;
+  const vmap = buildVenueMap();
+  const match = Object.entries(vmap).find(([k]) => k.toLowerCase() === v.toLowerCase());
+  if (match) {
+    const city    = document.getElementById('f-city-form');
+    const country = document.getElementById('f-country');
+    if (city    && !city.value)    city.value    = match[1].city;
+    if (country && !country.value) country.value = match[1].country;
+  }
+}
+
+function suggestFromCity(val) {
+  const v = val.trim().toLowerCase();
+  if (!v) return;
+  // Find country for this city
+  const ev = DB.events.find(e => e.city?.toLowerCase() === v && e.country);
+  if (ev) {
+    const country = document.getElementById('f-country');
+    if (country && !country.value) country.value = ev.country;
+  }
+}
+
+function suggestFromCountry(val) {
+  // No auto-fill from country alone — too ambiguous
+}
+
+// ── THREE-STATE BAND PERSON TOGGLE ───────────────────────────
+// States: '' (not there) → 'seen' → 'skip' → 'hate' → ''
+function cycleBandPersonState(btn) {
+  const idx  = parseInt(btn.dataset.idx);
+  const code = btn.dataset.code;
+  if (!formBandRows[idx]) return;
+  if (!formBandRows[idx].personStates) formBandRows[idx].personStates = {};
+  const cur = formBandRows[idx].personStates[code] || '';
+  // Only allow seen/skip/hate if person was at event
+  const atEvent = formEventAttendees.has(code);
+  let next;
+  if (!atEvent) return; // can't cycle if not at event
+  if (cur === '')       next = 'seen';
+  else if (cur === 'seen') next = 'skip';
+  else if (cur === 'skip') next = 'hate';
+  else                  next = '';
+
+  formBandRows[idx].personStates[code] = next;
+  // Keep attendees Set in sync (for legacy compatibility)
+  if (!formBandRows[idx].attendees) formBandRows[idx].attendees = new Set();
+  if (next === 'seen') formBandRows[idx].attendees.add(code);
+  else                 formBandRows[idx].attendees.delete(code);
+
+  // Update button appearance
+  btn.className = 'band-person-toggle';
+  if (next === 'seen') btn.classList.add('st-seen');
+  else if (next === 'skip') btn.classList.add('st-skip');
+  else if (next === 'hate') btn.classList.add('st-hate');
+  btn.setAttribute('data-code', code);
+  btn.setAttribute('data-idx', idx);
+}
+
+function buildBandRowHTML(idx, row) {
+  const cancelledClass = row.status === 'cancelled' ? 'cancelled' : '';
+  const mainPeople = MAIN_CODES.map(c => {
+    const atEvent = formEventAttendees.has(c);
+    const state   = row.personStates?.[c] || (row.attendees?.has(c) ? 'seen' : '');
+    let stateCls  = '';
+    if (state === 'seen') stateCls = 'st-seen';
+    else if (state === 'skip') stateCls = 'st-skip';
+    else if (state === 'hate') stateCls = 'st-hate';
+    const dimmed = !atEvent ? 'opacity:0.25;cursor:default' : '';
+    return `<button class="band-person-toggle ${stateCls}" data-code="${c}" data-idx="${idx}" onclick="cycleBandPersonState(this)" style="${dimmed}" title="${state||'not at event'}">${c}</button>`;
+  }).join('');
+  return `<div class="band-row" id="band-row-${idx}" data-idx="${idx}">
+    <div class="typeahead-wrap">
+      <input class="typeahead-input${row.is_new_band?' new-band':''}" id="band-input-${idx}" type="text"
+        placeholder="Band name…" value="${escHtml(row.band_name)}"
+        oninput="onBandInput(${idx},this.value)" onkeydown="onBandKeydown(event,${idx})" autocomplete="off">
+      <div class="typeahead-dropdown" id="band-dd-${idx}" style="display:none"></div>
+    </div>
+    <button class="band-status-toggle ${cancelledClass}" id="band-status-${idx}" onclick="toggleBandStatus(${idx})">${row.status}</button>
+    <div class="band-row-attendees" id="band-att-${idx}">${mainPeople}</div>
+    <button class="band-remove-btn" onclick="removeBandRow(${idx})" title="Remove">×</button>
+  </div>`;
+}
   const visible = [...new Set([...MAIN_CODES, ...formEventAttendees])];
   const people  = DB.people.filter(p => visible.includes(p.person_code));
   const mainEntries = MAIN_CODES.map(c => people.find(p=>p.person_code===c) || { person_code:c, person_name:c });
@@ -917,28 +1266,9 @@ function buildAllBandRows() {
   return formBandRows.map((row,idx) => row ? buildBandRowHTML(idx,row) : '').join('');
 }
 
-function buildBandRowHTML(idx, row) {
-  const cancelledClass = row.status === 'cancelled' ? 'cancelled' : '';
-  const mainPeople = MAIN_CODES.map(c => {
-    const isActive = row.attendees?.has(c);
-    return `<button class="band-person-toggle${isActive?' active':''}" data-code="${c}" data-idx="${idx}" onclick="toggleBandAttendee(this)">${c}</button>`;
-  }).join('');
-  return `<div class="band-row" id="band-row-${idx}" data-idx="${idx}">
-    <div class="typeahead-wrap">
-      <input class="typeahead-input${row.is_new_band?' new-band':''}" id="band-input-${idx}" type="text"
-        placeholder="Band name…" value="${escHtml(row.band_name)}"
-        oninput="onBandInput(${idx},this.value)" onkeydown="onBandKeydown(event,${idx})" autocomplete="off">
-      <div class="typeahead-dropdown" id="band-dd-${idx}" style="display:none"></div>
-    </div>
-    <button class="band-status-toggle ${cancelledClass}" id="band-status-${idx}" onclick="toggleBandStatus(${idx})">${row.status}</button>
-    <div class="band-row-attendees" id="band-att-${idx}">${mainPeople}</div>
-    <button class="band-remove-btn" onclick="removeBandRow(${idx})" title="Remove">×</button>
-  </div>`;
-}
-
 function addBandRow(rowData) {
   const idx = formBandRows.length;
-  const row = rowData || { band_id: null, band_name: '', status: 'performed', attendees: new Set() };
+  const row = rowData || { band_id: null, band_name: '', status: 'performed', attendees: new Set(), personStates: {} };
   formBandRows.push(row);
   const container = document.getElementById('band-rows');
   if (container) { const div = document.createElement('div'); div.innerHTML = buildBandRowHTML(idx, row); container.appendChild(div.firstElementChild); }
@@ -955,14 +1285,6 @@ function toggleBandStatus(idx) {
   formBandRows[idx].status = formBandRows[idx].status === 'cancelled' ? 'performed' : 'cancelled';
   const btn = document.getElementById(`band-status-${idx}`);
   if (btn) { btn.textContent = formBandRows[idx].status; btn.classList.toggle('cancelled', formBandRows[idx].status==='cancelled'); }
-}
-
-function toggleBandAttendee(btn) {
-  const idx = parseInt(btn.dataset.idx), code = btn.dataset.code;
-  if (!formBandRows[idx]) return;
-  if (!formBandRows[idx].attendees) formBandRows[idx].attendees = new Set();
-  if (formBandRows[idx].attendees.has(code)) { formBandRows[idx].attendees.delete(code); btn.classList.remove('active','active-other'); }
-  else { formBandRows[idx].attendees.add(code); btn.classList.add(MAIN_CODES.includes(code) ? 'active' : 'active-other'); }
 }
 
 function onBandInput(idx, val) {
@@ -1095,13 +1417,18 @@ async function saveEvent() {
   const date      = (document.getElementById('f-date')?.value||'').trim();
   const status    = document.getElementById('f-status-form')?.value || 'upcoming';
   const city      = (document.getElementById('f-city-form')?.value||'').trim();
+  const country   = (document.getElementById('f-country')?.value||'').trim();
   const venue     = (document.getElementById('f-venue')?.value||'').trim();
-  const festival  = (document.getElementById('f-festival')?.value||'').trim();
-  const tour      = (document.getElementById('f-tour')?.value||'').trim();
+  const ftType    = document.getElementById('f-festtour-type')?.value || 'festival';
+  const ftVal     = (document.getElementById('f-festtour')?.value||'').trim();
+  const festival  = ftType === 'festival' ? ftVal : '';
+  const tour      = ftType === 'tour'     ? ftVal : '';
   const price     = (document.getElementById('f-price')?.value||'').trim();
   const currency  = document.getElementById('f-currency')?.value||'';
   const priceNote = (document.getElementById('f-price-note')?.value||'').trim();
   const notes     = (document.getElementById('f-notes')?.value||'').trim();
+  const eventUrl  = (document.getElementById('f-event-url')?.value||'').trim();
+  const ticketUrl = (document.getElementById('f-ticket-url')?.value||'').trim();
 
   if (!date) { showFormMsg('error','Date is required.'); if(btn) btn.disabled=false; return; }
 
@@ -1112,8 +1439,9 @@ async function saveEvent() {
   const payload = {
     action: formMode==='edit' ? 'edit_event' : 'add_event',
     event_id: editEventId||null,
-    date, status, city, venue, festival, tour,
-    ticket_price_original: price, ticket_currency: currency, price_note: priceNote, notes,
+    date, status, city, country, venue, festival, tour,
+    ticket_price_original: price, ticket_currency: currency, price_note: priceNote,
+    event_url: eventUrl, ticket_url: ticketUrl, notes,
     event_attendees: [...formEventAttendees],
     bands
   };
@@ -1128,7 +1456,7 @@ async function saveEvent() {
 
     const fresh = await fetch(API_URL);
     const fd = await fresh.json();
-    fd.attendance = fd.attendance.map(a=>({...a,was_at_event:a.was_at_event==='True',did_see:a.did_see==='True'}));
+    fd.attendance = fd.attendance.map(a=>({...a,was_at_event:a.was_at_event==='True',did_see:a.did_see==='True',hated_it:a.hated_it==='True'}));
     fd.events      = fd.events.map(e=>({...e,event_id:String(e.event_id)}));
     fd.bands       = fd.bands.map(b=>({...b,band_id:String(b.band_id)}));
     fd.event_bands = fd.event_bands.map(eb=>({...eb,event_id:String(eb.event_id),band_id:String(eb.band_id),event_band_id:String(eb.event_band_id)}));
@@ -1162,6 +1490,18 @@ function showFormMsg(type, msg) {
 function escHtml(s) {
   return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+// Live-update URL icon hrefs as user types
+document.addEventListener('input', e => {
+  if (e.target.id === 'f-event-url') {
+    const btn = document.getElementById('event-url-btn');
+    if (btn) btn.href = e.target.value || '#';
+  }
+  if (e.target.id === 'f-ticket-url') {
+    const btn = document.getElementById('ticket-url-btn');
+    if (btn) btn.href = e.target.value || '#';
+  }
+});
 </script>
 </body>
 </html>

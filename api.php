@@ -1,6 +1,6 @@
 <?php
 // ══════════════════════════════════════════════════════════════
-// api.php  — ConcertsDB backend  (v3.4)
+// api.php  — ConcertsDB backend  (v3.5)
 // ══════════════════════════════════════════════════════════════
 
 require_once __DIR__ . '/auth.php';
@@ -123,15 +123,15 @@ try {
 
 /**
  * Insert a new row into events. Returns the new event_id.
- * v3.4: added country field.
+ * v3.5: replaced setlistfm_url with event_url + ticket_url.
  */
 function insertEvent(PDO $pdo, array $d): int {
     $stmt = $pdo->prepare("
         INSERT INTO events
             (date, city, country, venue, festival, tour, status,
              ticket_price_original, ticket_currency, price_note,
-             setlistfm_url, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NULL, ?)
+             event_url, ticket_url, notes)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     ");
     $stmt->execute([
         sanitiseDate($d['date']    ?? ''),
@@ -144,6 +144,8 @@ function insertEvent(PDO $pdo, array $d): int {
         trim($d['ticket_price_original'] ?? ''),
         trim($d['ticket_currency']       ?? ''),
         trim($d['price_note']            ?? ''),
+        trim($d['event_url']             ?? ''),
+        trim($d['ticket_url']            ?? ''),
         trim($d['notes']                 ?? ''),
     ]);
     return (int) $pdo->lastInsertId();
@@ -151,7 +153,7 @@ function insertEvent(PDO $pdo, array $d): int {
 
 /**
  * Update an existing event row.
- * v3.4: added country field.
+ * v3.5: replaced setlistfm_url with event_url + ticket_url.
  */
 function updateEvent(PDO $pdo, int $event_id, array $d): void {
     $stmt = $pdo->prepare("
@@ -166,6 +168,8 @@ function updateEvent(PDO $pdo, int $event_id, array $d): void {
             ticket_price_original = ?,
             ticket_currency       = ?,
             price_note            = ?,
+            event_url             = ?,
+            ticket_url            = ?,
             notes                 = ?
         WHERE event_id = ?
     ");
@@ -180,6 +184,8 @@ function updateEvent(PDO $pdo, int $event_id, array $d): void {
         trim($d['ticket_price_original'] ?? ''),
         trim($d['ticket_currency']       ?? ''),
         trim($d['price_note']            ?? ''),
+        trim($d['event_url']             ?? ''),
+        trim($d['ticket_url']            ?? ''),
         trim($d['notes']                 ?? ''),
         $event_id,
     ]);
@@ -218,7 +224,7 @@ function processBands(PDO $pdo, int $event_id, array $d): void {
             if ($row) {
                 $band_id = (int) $row['band_id'];
             } else {
-                $ins = $pdo->prepare("INSERT INTO bands (band_name) VALUES (?)");
+                $ins = $pdo->prepare("INSERT INTO bands (band_name, metallum_url, spotify_url, setlistfm_url) VALUES (?, NULL, NULL, NULL)");
                 $ins->execute([$band_name]);
                 $band_id = (int) $pdo->lastInsertId();
             }
